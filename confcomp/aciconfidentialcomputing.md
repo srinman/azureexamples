@@ -64,7 +64,7 @@ cat aciconfidentialcomputingtemplate.json  | grep ccePolicy
 
 ### Deploy ACI
 
-
+You may need to change aciconfidentialcomputingtemplate.json with your acrname, image name+tag and resource group name.  This is a simple template with just one container.  
 ```
 az deployment group create --resource-group acirg --template-file aciconfidentialcomputingtemplate.json
 ```
