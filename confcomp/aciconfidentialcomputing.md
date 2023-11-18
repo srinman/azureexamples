@@ -10,7 +10,7 @@ https://github.com/srinman/azureexamplespriv/blob/main/confcompute/aciconfidenti
 
 Confidential containers on Azure Container Instances protect data-in-use and encrypts data being used in memory.  An important step in implementing confidential computing is generating a CCE policy. CCE policies can also be used to verify the integrity of the container image and the runtime environment, even if there is no sensitive data. For eg, if you want to verify that the container image has not been modified, you can use CCE policy to verify the integrity of the container image. ACI is a fully managed serverless container platform that supports deploying a simple containerized application without a full blown orchestrator such as AKS.
 
-
+In this exercise, we will deploy a container on ACI with CCE policy.  We will then hack the image and try to deploy the same image.  We will see that the deployment fails because the image has been modified.  We will then deploy the same image without CCE policy and see that the deployment succeeds.
 
 ## Prerequisites
 
@@ -49,7 +49,6 @@ The confidentialComputeProperties object enables you to pass in a custom confide
 Let's check ccePolicy in the template.json file.  It should be blank.   
 
 ```
-cp aciconfidentialcomputingtemplate_blankccepolicy.json aciconfidentialcomputingtemplate.json
 cat aciconfidentialcomputingtemplate.json  | grep ccePolicy 
 ```   
 
@@ -61,10 +60,6 @@ az confcom acipolicygen -a aciconfidentialcomputingtemplate.json
 cat aciconfidentialcomputingtemplate.json  | grep ccePolicy  
 ``` 
 
-
-or  
-
-alternatively show this file in vscode and search for ccePolicy.  You should see a long string.  
 
 
 ### Deploy ACI
@@ -80,7 +75,7 @@ az confcom acipolicygen -a aciconfidentialcomputingtemplate.json
 You should see this message. 
 youracrname.azurecr.io/simpleapp:v1 is not found locally. Attempting to pull from remote...
 
-Use portal, navigate to container and try to 'Connect'. It should fail. 
+Use portal, navigate to container and try to 'Connect'. It should fail.  This is a good sign.  It means that ccepolicy is not allowing to connect.
 
 ## Validate deployment after hacking image!
 
@@ -107,7 +102,7 @@ Use portal (CLI is also possible)
 You should be able to see a failure message like this below.
 ![Alt text](image-20.png)
 
-This is because ccepolicy is not allowing the image to run.  
+This is because ccepolicy is not allowing the image to run. Image hash is not matching with the hash in the ccepolicy.  This is a good sign.  It means that ccepolicy is not allowing to start the container with new image from the registry.  
 
 Let's delete the ACI and redeploy with deploy command. Please understand that we haven't touched the template.  We are just redeploying the same template - referring the same image. However, the image has changed.
 
@@ -118,10 +113,6 @@ az deployment group create --resource-group acirg --template-file aciconfidentia
 Deployment should fail since ccepolicy detects change in image and fails the deployment.  
 
 
-However, we can continue to deploy this image without CCE policy.  Use portal to deploy ACI with the same image name.  You should be able to see the app running with HACKED with red background.
-
-This command overwrites simpleapp:v1 with good image
-az acr import --name srinmanmsdn --source youracrname.azurecr.io/simpleapp:v1clean -t youracrname.azurecr.io/simpleapp:v1
 
 
 
