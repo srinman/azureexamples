@@ -10,7 +10,7 @@ https://github.com/srinman/azureexamplespriv/blob/main/confcompute/aciconfidenti
 
 Confidential containers on Azure Container Instances protect data-in-use and encrypts data being used in memory.  An important step in implementing confidential computing is generating a CCE policy. CCE policies can also be used to verify the integrity of the container image and the runtime environment, even if there is no sensitive data. For eg, if you want to verify that the container image has not been modified, you can use CCE policy to verify the integrity of the container image. ACI is a fully managed serverless container platform that supports deploying a simple containerized application without a full blown orchestrator such as AKS.
 
-In this exercise, we will deploy a container on ACI with CCE policy.  We will then hack the image and try to deploy the same image.  We will see that the deployment fails because the image has been modified.  We will then deploy the same image without CCE policy and see that the deployment succeeds.
+In this exercise, we will deploy a container on ACI with CCE policy.  We will then hack the image and try to deploy the same image name/same tag.  We will see that the deployment fails because the image has been modified.   
 
 ## Prerequisites
 
@@ -84,9 +84,9 @@ for testing, let's use https://github.com/srinman/simpleapp
 
 use Azure shell which makes it easier to make this change and use az acr build to build the image and push to ACR.  
 
-git clone https://github.com/srinman/simpleapp
-cd simpleapp
-change app.py to use indexv1hacked.html 
+git clone https://github.com/srinman/simpleapp  
+cd simpleapp  
+change app.py to use indexv1hacked.html   
 
 az acr login --name regname --expose-token
 docker login youracr.azurecr.io  -u 00000000-0000-0000-0000-000000000000 -p <token>   
