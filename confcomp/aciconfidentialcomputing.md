@@ -74,11 +74,11 @@ alternatively show this file in vscode and search for ccePolicy.  You should see
 az deployment group create --resource-group acirg --template-file aciconfidentialcomputingtemplate.json
 ```
 
-If it fails, refresh local image. You may have seen "Using local version of srinmanmsdn.azurecr.io/simpleapp:v1. It may differ from the remote image"  while creating ccepolicy
+If it fails, refresh local image. You may have seen "Using local version of youracrname.azurecr.io/simpleapp:v1. It may differ from the remote image"  while creating ccepolicy
 use docker rmi image:tag
 az confcom acipolicygen -a aciconfidentialcomputingtemplate.json 
 You should see this message. 
-srinmanmsdn.azurecr.io/simpleapp:v1 is not found locally. Attempting to pull from remote...
+youracrname.azurecr.io/simpleapp:v1 is not found locally. Attempting to pull from remote...
 
 Use portal, navigate to container and try to 'Connect'. It should fail. 
 
@@ -96,7 +96,7 @@ change app.py to use indexv1hacked.html
 az acr login --name regname --expose-token
 docker login youracr.azurecr.io  -u 00000000-0000-0000-0000-000000000000 -p <token>   
 
-az acr build --registry srinmanmsdn.azurecr.io --image simpleapp:v1 .
+az acr build --registry youracrname.azurecr.io --image simpleapp:v1 .
 
 This command builds image with changed code and pushes image to same repo and with same tag (basically overwrites the image).
 
@@ -121,7 +121,7 @@ Deployment should fail since ccepolicy detects change in image and fails the dep
 However, we can continue to deploy this image without CCE policy.  Use portal to deploy ACI with the same image name.  You should be able to see the app running with HACKED with red background.
 
 This command overwrites simpleapp:v1 with good image
-az acr import --name srinmanmsdn --source srinmanmsdn.azurecr.io/simpleapp:v1clean -t srinmanmsdn.azurecr.io/simpleapp:v1
+az acr import --name srinmanmsdn --source youracrname.azurecr.io/simpleapp:v1clean -t youracrname.azurecr.io/simpleapp:v1
 
 
 
