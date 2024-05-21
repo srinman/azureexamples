@@ -49,7 +49,7 @@ k get ingress -A
 
 
 
-Open browser and use IPs for ingress1 and ingress2 to access the services.  
+Open any browser and use IPs for ingress1 and ingress2 to access the services.  
 
 http://ingress1IP/testpathtoworkload1  
 http://ingress2IP/testpathtoworkload2
