@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress1
+  namespace: workload1
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /testpathtoworkload1
+        pathType: Prefix
+        backend:
+          service:
+            name: echosvc
+            port:
+              number: 80
