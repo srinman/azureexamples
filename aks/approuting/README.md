@@ -58,7 +58,7 @@ spec:
     service.beta.kubernetes.io/azure-load-balancer-internal: "true"
 ``` 
 
-
+```
 kubectl get nginxingresscontroller  
 
 kubectl create namespace hello-web-app-routing  
@@ -105,7 +105,7 @@ spec:
     app: aks-helloworld
 ```
 
-
+```
 k apply -f testingress.yaml  
 ```
 
