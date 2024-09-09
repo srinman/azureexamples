@@ -2,7 +2,8 @@
 
 
 
-###  Create a new AKS cluster with OIDC issuer enabled. 
+##  Few things to note before we start
+
 
 tried to remove variable names and use the actual values for more readability.   
 
@@ -13,9 +14,9 @@ namespace: testns
 service account: testsa  
 storage account name: srinmanwkldstorage.blob.core.windows.net
 
+For more context, review https://blog.srinman.com/blog2/  
 
-
-Create a new AKS cluster with OIDC issuer enabled and workload identity enabled.  
+## Create a new AKS cluster with OIDC issuer enabled and workload identity enabled
 
 ```bash
 az aks create -g aksrg -n aks --enable-oidc-issuer --enable-workload-identity  
@@ -23,7 +24,7 @@ az aks create -g aksrg -n aks --enable-oidc-issuer --enable-workload-identity
 export AKS_OIDC_ISSUER="$(az aks show -n aks -g aksrg --query "oidcIssuerProfile.issuerUrl" --output tsv)"
 ```
 
-Create a user assigned managed identity and a federated credential.  
+## Create a user assigned managed identity and a federated credential
 
 ```bash
 az identity create --name aksappmi --resource-group aksrg --location eastus2
@@ -33,14 +34,14 @@ az identity federated-credential create --name fedaksappmi --identity-name aksap
 export UAMI_CLIENTID="$(az identity show -n aksappmi -g aksrg --query 'clientId' --output tsv)"
 ```
 
-Create a namespace and a service account in the namespace.   
+## Create a namespace and a service account in the namespace  
 
 ```bash
 az aks get-credentials -g aksrg -n aks
 k create ns testns 
 ```
 
-Create a service account in the namespace.  
+## Create a service account in the namespace  
 ```bash
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
@@ -53,7 +54,9 @@ metadata:
 EOF
 ```
 
-Use Dockerfile provided in the repo to build the image and push it to your container registry.  Use az acr build for building the image.  
+## Create container image and run the application   
+
+Use Dockerfile provided in the repo to build the image and push it to your container registry.  Use az acr build for building the image.    
 
 ```bash
 az acr build -t srinmantest.azurecr.io/wkldtest:v3 -r srinmantest .
