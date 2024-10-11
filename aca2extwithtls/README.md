@@ -66,6 +66,17 @@ This Python code sets up a simple HTTPS server that responds with a plain text m
 4. **Main Block**:
    - The `if __name__ == '__main__':` block ensures that the `run` function is called when the script is executed directly.
 
+#### Relation to Certificates
+
+- **Server Certificate and Key**:
+  - The server uses a certificate (`/certs/server-cert.pem`) and a private key (`/certs/server-key.pem`) to establish a secure TLS connection.
+  - These files are specified in the `ssl.wrap_socket` call to enable TLS on the server.
+
+### Summary
+
+- This Python program sets up a simple HTTPS server that listens on port 443 and responds with a plain text message.
+- The server uses TLS to secure the connection, requiring a server certificate and private key.
+- The `SimpleHandler` class handles GET requests, and the `run` function sets up and starts the server.  
 
 ### Dockerfile for python program   
 
@@ -506,37 +517,9 @@ if __name__ == '__main__':
     run()
 ```
 
-## Key Points
 
-1. **Imports**:
-   - The code imports `HTTPServer` and `SimpleHTTPRequestHandler` from the `http.server` module to handle HTTP requests.
-   - The `ssl` module is imported to add TLS support to the server.
 
-2. **SimpleHandler Class**:
-   - This class extends `SimpleHTTPRequestHandler` and overrides the `do_GET` method to handle GET requests.
-   - The `do_GET` method sends a 200 OK response with a `Content-type` header set to `text/plain`.
-   - It writes the message `Hello, TLS!` to the response body and flushes the output to ensure it is sent.
 
-3. **run Function**:
-   - This function sets up and starts the HTTPS server.
-   - It creates an `HTTPServer` instance bound to port 443.
-   - The server's socket is wrapped with TLS using `ssl.wrap_socket`, specifying the server certificate and key files.
-   - The server is started with `httpd.serve_forever()`.
-
-4. **Main Block**:
-   - The `if __name__ == '__main__':` block ensures that the `run` function is called when the script is executed directly.
-
-## Relation to Certificates
-
-- **Server Certificate and Key**:
-  - The server uses a certificate (`/certs/server-cert.pem`) and a private key (`/certs/server-key.pem`) to establish a secure TLS connection.
-  - These files are specified in the `ssl.wrap_socket` call to enable TLS on the server.
-
-## Summary
-
-- This Python program sets up a simple HTTPS server that listens on port 443 and responds with a plain text message.
-- The server uses TLS to secure the connection, requiring a server certificate and private key.
-- The `SimpleHandler` class handles GET requests, and the `run` function sets up and starts the server.
 
 
 
