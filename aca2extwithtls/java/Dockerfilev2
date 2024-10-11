@@ -1,0 +1,18 @@
+# Use an official OpenJDK runtime as a parent image
+FROM openjdk:11-jdk-slim
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the Java program and the certificate
+COPY SimpleTLSClient.java /app/SimpleTLSClient.java
+COPY certs/server-cert.pem /usr/local/share/ca-certificates/server-cert.crt
+
+# Install the certificate and update the CA certificates
+RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
+
+# Compile the Java program
+RUN javac SimpleTLSClient.java
+
+# Run the Java program
+CMD ["java", "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts", "SimpleTLSClient"]
