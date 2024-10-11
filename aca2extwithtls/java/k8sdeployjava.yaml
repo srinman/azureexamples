@@ -1,18 +1,12 @@
-apiVersion: batch/v1
-kind: CronJob
+apiVersion: v1
+kind: Pod
 metadata:
   name: simple-tls-client
+  labels:
+    app: simple-tls-client
 spec:
-  schedule: "*/1 * * * *"
-  jobTemplate:
-    spec:
-      template:
-        metadata:
-          labels:
-            app: simple-tls-client
-        spec:
-          containers:
-          - name: simple-tls-client
-            image: srinmantest.azurecr.io/simple-tls-client:v6
-            imagePullPolicy: Always
-          restartPolicy: OnFailure
+  containers:
+  - name: simple-tls-client
+    image: srinmantest.azurecr.io/simple-tls-client:v11
+    imagePullPolicy: Always
+  restartPolicy: OnFailure

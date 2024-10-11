@@ -3,15 +3,18 @@
 This is a simple example of TLS communication between a client and a server. The server is a simple python server that listens on port 443 and the client is a simple java client that connects to the server. The server and client communicate over TLS. The server and client are dockerized and can be run in a container.
 
 
-## Let's generate the server and client certificates
+## Let's generate the certificates
 
 ```bash
 openssl req -x509 -newkey rsa:4096 -keyout server-key.pem -out server-cert.pem -days 365 -nodes -subj "/CN=pythonsvc"
 ```
 
+For simplicity, we use hostname as pythonsvc.  This is going to be deployed as a service in AKS. Host header will be set to pythonsvc.  
+
 
 ## Simple python server program and Dockerfile
 
+### Python Program   
 
 ```python
 from http.server import HTTPServer, SimpleHTTPRequestHandler
@@ -41,7 +44,7 @@ if __name__ == '__main__':
 ```
 
 
-#### Explanation
+### Explanation
 
 This Python code sets up a simple HTTPS server that responds with a plain text message. Here's a detailed explanation:
 
@@ -64,6 +67,7 @@ This Python code sets up a simple HTTPS server that responds with a plain text m
    - The `if __name__ == '__main__':` block ensures that the `run` function is called when the script is executed directly.
 
 
+### Dockerfile for python program   
 
 ```docker
 # Use an official Python runtime as a parent image
@@ -90,7 +94,7 @@ az acr build --registry srinmantest --image tls-server:v4 .
 ```
 
 
-#### Explanation
+### Explanation
 
 This Dockerfile is used to create a Docker image for running the simple HTTPS server written in Python. Here's a step-by-step explanation:
 
@@ -125,6 +129,10 @@ This Dockerfile is used to create a Docker image for running the simple HTTPS se
    - This `CMD` instruction specifies the command to run when the container starts. It runs the Python server script `server.py`.
 
 
+## Deploying the server on AKS
+
+
+### Preparation  
 
 For deploying this on AKS, we need to create a secret in the namespace where the server is running.
 
@@ -133,7 +141,9 @@ From the root of the repo, create a secret (assuming certs are in certs director
 kubectl create secret tls tls-secret --cert=certs/server-cert.pem --key=certs/server-key.pem 
 ```
 
-Deployment of the server  
+
+
+### Deployment of the server  
 
 ```yaml
 apiVersion: apps/v1
@@ -179,7 +189,7 @@ spec:
 ```
 
 
-#### Explanation
+### Explanation
 
 1. **Kubernetes Secrets**:
    - Use Kubernetes Secrets to securely store and manage your TLS certificates and keys.
@@ -243,6 +253,29 @@ public class SimpleTLSClient {
     }
 }
 ```
+
+```Dockerfile
+# Use an official OpenJDK runtime as a parent image
+FROM openjdk:11-jdk-slim
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the Java program and the certificate
+COPY SimpleTLSClient.java /app/SimpleTLSClient.java
+COPY certs/server-cert.pem /usr/local/share/ca-certificates/server-cert.crt
+
+# Install the certificate and import it into the Java trust store
+RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates && \
+    keytool -import -trustcacerts -file /usr/local/share/ca-certificates/server-cert.crt -alias server-cert -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt
+
+# Compile the Java program
+RUN javac SimpleTLSClient.java
+
+# Run the Java program
+CMD ["java", "SimpleTLSClient"]
+```
+
 
 #### Key Points
 
@@ -356,11 +389,90 @@ ca-certificates
 - The Dockerfile sets up a container with OpenJDK 11, installs a specific TLS certificate, compiles the `SimpleTLSClient` Java program, and specifies that the program should be run when the container starts.
 - The truststore configuration in the Dockerfile ensures that the `SimpleTLSClient` can verify the server's certificate during the TLS handshake, which is essential for establishing a secure connection.
 
+### Alternative Approach for Dockerfile for Java client program
 
 
+#### Dockerfile (Dockerfilev2)
+
+```dockerfile
+# Use an official OpenJDK runtime as a parent image
+FROM openjdk:11-jdk-slim
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the Java program and the certificate
+COPY SimpleTLSClient.java /app/SimpleTLSClient.java
+COPY certs/server-cert.pem /usr/local/share/ca-certificates/server-cert.crt
+
+# Install the certificate and update the CA certificates
+RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
+
+# Compile the Java program
+RUN javac SimpleTLSClient.java
+
+# Run the Java program
+CMD ["java", "SimpleTLSClient"]
+```
+
+#### Dockerfile Explanation
+
+Certainly! Let's break down the provided Dockerfile and explain each step, with an emphasis on how the `server-cert` is handled and the decision to not use the Java trust store.
 
 
-Certainly! Below is the documentation for the provided Python program in Markdown format:
+```dockerfile
+# Use an official OpenJDK runtime as a parent image
+FROM openjdk:11-jdk-slim
+```
+- **Base Image**: This line specifies the base image for the Docker build. It uses the official OpenJDK 11 runtime with a slimmed-down Debian-based image. This provides the necessary Java runtime environment for running Java applications.
+
+```dockerfile
+# Set the working directory
+WORKDIR /app
+```
+- **Working Directory**: This line sets the working directory inside the container to `/app`. All subsequent commands will be run from this directory.
+
+```dockerfile
+# Copy the Java program and the certificate
+COPY SimpleTLSClient.java /app/SimpleTLSClient.java
+COPY certs/server-cert.pem /usr/local/share/ca-certificates/server-cert.crt
+```
+- **Copy Java Program**: The first [`COPY`]   command copies the Java source file `SimpleTLSClient.java` from the build context (your local machine) to the `/app` directory inside the container.
+- **Copy Certificate**: The second [`COPY`]   command copies the `server-cert.pem` certificate from the certs directory in the build context to `/usr/local/share/ca-certificates/server-cert.crt` inside the container. This is the location where the system's CA certificates are stored.
+
+```dockerfile
+# Install the certificate and update the CA certificates
+RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
+```
+- **Update Package List**: `apt-get update` updates the package list to ensure the latest versions of packages are available.
+- **Install CA Certificates**: `apt-get install -y ca-certificates` installs the `ca-certificates` package, which includes tools for managing CA certificates.
+- **Update CA Certificates**: `update-ca-certificates` processes the certificates in /usr/local/share/ca-certificates and adds them to the system's CA certificates store. This command ensures that the `server-cert.crt` is recognized as a trusted certificate by the system.
+
+```dockerfile
+# Compile the Java program
+RUN javac SimpleTLSClient.java
+```
+- **Compile Java Program**: This command compiles the `SimpleTLSClient.java` source file into bytecode that can be executed by the Java runtime.
+
+```dockerfile
+# Run the Java program
+CMD ["java", "SimpleTLSClient"]
+```
+- **Run Java Program**: This command specifies the default command to run when the container starts. It runs the compiled Java program [`SimpleTLSClient`]  
+
+### Handling of `server-cert`
+
+- **System CA Certificates Store**: The `server-cert.pem` certificate is copied to `/usr/local/share/ca-certificates/server-cert.crt` and then processed by the `update-ca-certificates` command. This adds the certificate to the system's CA certificates store, making it trusted by the system.
+- **Not Using Java Trust Store**: The Dockerfile does not explicitly configure the Java trust store (`$JAVA_HOME/lib/security/cacerts`). Instead, it relies on the system's CA certificates store. This approach simplifies certificate management by leveraging the existing system infrastructure for trusted certificates.
+
+### Benefits of Not Using Java Trust Store
+
+1. **Simplified Management**: By using the system's CA certificates store, you avoid the need to manually import certificates into the Java trust store using `keytool`. This reduces complexity and potential errors.
+2. **Dynamic Updates**: Certificates can be updated at the system level without needing to rebuild the Docker image. This is particularly useful in environments where certificates might change frequently.
+3. **Consistency**: Using the system's CA certificates ensures consistency across different applications and services running on the same system. All applications will trust the same set of certificates.
+4. **Security**: The system's CA certificates store is typically managed by the operating system and kept up-to-date with the latest trusted certificates, enhancing security.
+
+By relying on the system's CA certificates store, this Dockerfile simplifies the process of managing trusted certificates and ensures that the Java application can securely connect to services using the provided `server-cert`.
 
 ```markdown
 # Python Program Explanation
@@ -447,3 +559,10 @@ docker push srinmantest.azurecr.io/simple-tls-client:v1
 az acr build --registry srinmantest --image tls-server:v3 .
 
 az acr build --registry srinmantest --image simple-tls-client:v3 .
+
+az acr build --registry srinmantest --image simple-tls-client:v7 --file Dockerfilev2 .
+
+az acr build --registry srinmantest --image simple-tls-client:v7 --file Dockerfilev2 .
+
+az acr build --registry srinmantest --image simple-tls-client:vx --file Dockerfile-nocert .
+
