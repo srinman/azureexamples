@@ -12,7 +12,7 @@
         <validate-jwt header-name="Authorization" failed-validation-httpcode="401" failed-validation-error-message="Call from non-approved managed identity is not allowed" require-expiration-time="true" require-scheme="Bearer" require-signed-tokens="true">
             <openid-config url="https://login.microsoftonline.com/d12058fe-ecf4-454a-9a69-cef5686fc24f/v2.0/.well-known/openid-configuration" />
             <audiences>
-                <audience>https://management.azure.com</audience>
+                 <audience>api://mydummyapi</audience>
             </audiences>
             <issuers>
                 <issuer>https://sts.windows.net/d12058fe-ecf4-454a-9a69-cef5686fc24f/</issuer>

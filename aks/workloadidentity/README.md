@@ -59,8 +59,11 @@ EOF
 Use Dockerfile provided in the repo to build the image and push it to your container registry.  Use az acr build for building the image.    
 
 ```bash
-az acr build -t srinmantest.azurecr.io/wkldtest:dacapim -r srinmantest .
+az acr build -t srinmantest.azurecr.io/wkldtest:dacapimsdk -r srinmantest .
+az acr build -t srinmantest.azurecr.io/wkldtest:resttok -r srinmantest -f Dockerfile_resttok .
+az acr build -t srinmantest.azurecr.io/wkldtest:sdktok -r srinmantest -f Dockerfile_sdktok .
 ```
+
 This ACR has to be integrated with the AKS cluster.  Use the following command to integrate the ACR with AKS, if it's not done already.  
 
 ```bash
@@ -81,13 +84,21 @@ spec:
   serviceAccountName: testsa
   containers:
   - name: blob-creator
-    image: srinmantest.azurecr.io/wkldtest:dacapim
+    image: srinmantest.azurecr.io/wkldtest:sdktok
     imagePullPolicy: Always
     env: 
     - name: STORAGE_ACCOUNT_URL
       value: "https://srinmanwkldstorage.blob.core.windows.net/"
 EOF
 ```
+k get pods -n testns
+k logs pythonpod -n testns
+k delete pod pythonpod -n testns --force
+
+## Python code and their explanation  
+
+**pythoncallapimtok.py**  
+This fetches token using   
 
 
 

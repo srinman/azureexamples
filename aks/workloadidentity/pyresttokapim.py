@@ -6,7 +6,7 @@ import time
 client_id = os.getenv('AZURE_CLIENT_ID')
 tenant_id = os.getenv('AZURE_TENANT_ID')
 federated_token_file = os.getenv('AZURE_FEDERATED_TOKEN_FILE')
-apim_endpoint = os.getenv('APIM_ENDPOINT','https://apim.srinman.com/testhttpbin/')  # Add your APIM endpoint here
+apim_endpoint = os.getenv('APIM_ENDPOINT', 'https://apim.srinman.com/testhttpbin/')  # Add your APIM endpoint here
 
 # Read the federated token from the file
 with open(federated_token_file, 'r') as file:
@@ -19,6 +19,8 @@ url = f'https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token'
 headers = {
     'Content-Type': 'application/x-www-form-urlencoded'
 }
+
+#     'scope': 'api://mydummyapi/Dummy.Read',
 
 data = {
     'client_id': client_id,
@@ -39,7 +41,7 @@ access_token = response_data.get('access_token')
 ACCESS_TOKEN = access_token
 
 # Print the access token
-print(f'Access Token: {ACCESS_TOKEN}')
+print(f'Access Token: {ACCESS_TOKEN}', flush=True)
 
 # Set the headers for the APIM request
 apim_headers = {
