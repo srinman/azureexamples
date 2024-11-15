@@ -59,7 +59,7 @@ EOF
 Use Dockerfile provided in the repo to build the image and push it to your container registry.  Use az acr build for building the image.    
 
 ```bash
-az acr build -t srinmantest.azurecr.io/wkldtest:v3 -r srinmantest .
+az acr build -t srinmantest.azurecr.io/wkldtest:dacapim -r srinmantest .
 ```
 This ACR has to be integrated with the AKS cluster.  Use the following command to integrate the ACR with AKS, if it's not done already.  
 
@@ -68,7 +68,8 @@ az aks update -n aks -g aksrg --attach-acr srinmantest
 ```  
 
 Yaml for deploying the pod.  
-```yaml
+```bash
+kubectl apply -f - <<EOF
 apiVersion: v1
 kind: Pod
 metadata:
@@ -80,10 +81,12 @@ spec:
   serviceAccountName: testsa
   containers:
   - name: blob-creator
-    image: srinmantest.azurecr.io/wkldtest:v3
+    image: srinmantest.azurecr.io/wkldtest:dacapim
+    imagePullPolicy: Always
     env: 
     - name: STORAGE_ACCOUNT_URL
       value: "https://srinmanwkldstorage.blob.core.windows.net/"
+EOF
 ```
 
 

@@ -25,7 +25,7 @@ EXPOSE 80
 ENV NAME World
 
 # Run pythonblob.py when the container launches
-CMD ["python", "./pythonblobwic.py"]
+CMD ["python", "./pythoncallapimtok.py"]
 
 # To allow shelling into the container, override the CMD with:
 # docker run -it --entrypoint /bin/bash <image_name>
