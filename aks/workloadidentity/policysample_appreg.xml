@@ -1,0 +1,44 @@
+<!--
+    - Policies are applied in the order they appear.
+    - Position <base/> inside a section to inherit policies from the outer scope.
+    - Comments within policies are not preserved.
+-->
+<!-- Add policies as children to the <inbound>, <outbound>, <backend>, and <on-error> elements -->
+<policies>
+    <!-- Throttle, authorize, validate, cache, or transform the requests -->
+    <inbound>
+        <base />
+        <!-- Validate the JWT token -->
+        <validate-jwt header-name="Authorization" failed-validation-httpcode="401" failed-validation-error-message="Call from non-approved managed identity is not allowed" require-expiration-time="true" require-scheme="Bearer" require-signed-tokens="true">
+            <openid-config url="https://login.microsoftonline.com/d12058fe-ecf4-454a-9a69-cef5686fc24f/v2.0/.well-known/openid-configuration" />
+            <audiences>
+                 <audience>api://mydummyapi</audience>
+            </audiences>
+            <issuers>
+                <issuer>https://sts.windows.net/d12058fe-ecf4-454a-9a69-cef5686fc24f/</issuer>
+            </issuers>
+            <required-claims>
+                <claim name="appid" match="all">
+                    <value>970e2d7a-18f7-424b-8cc1-6e162cb99f3e</value>
+                </claim>
+            </required-claims>
+        </validate-jwt>
+        <!-- Forward the token to the backend API -->
+        <set-header name="clientid" exists-action="override">
+            <value>970e2d7a-18f7-424b-8cc1-6e162cb99f3e</value>
+        </set-header>
+    </inbound>
+    <!-- Control if and how the requests are forwarded to services  -->
+    <backend>
+        <base />
+    </backend>
+    <!-- Customize the responses -->
+    <outbound>
+        <base />
+    </outbound>
+    <!-- Handle exceptions and customize error responses  -->
+    <on-error>
+        <base />
+    </on-error>
+</policies>
+
