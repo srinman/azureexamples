@@ -96,6 +96,8 @@ spec:
 EOF
 ```
 
+Use policysample.xml to validate the token in APIM.  
+
 Review logs and delete the pod.  
 
 ```bash
@@ -175,6 +177,9 @@ spec:
     imagePullPolicy: Always
 EOF
 ```
+
+appid changes with app registration. so change the appid in the policy file.  
+Use policysample_appreg.xml to validate the token in APIM.    
 
 
 Review logs and delete the pod.  
