@@ -95,10 +95,14 @@ spec:
       value: "https://srinmanwkldstorage.blob.core.windows.net/"
 EOF
 ```
-k get pods -n testns
-k logs pythonpod -n testns
-k delete pod pythonpod -n testns --force
 
+Review logs and delete the pod.  
+
+```bash
+k get pods -n testns  
+k logs pythonpod -n testns  
+k delete pod pythonpod -n testns --force   
+```
 
 
 
@@ -171,13 +175,15 @@ spec:
     imagePullPolicy: Always
 EOF
 ```
-k get pods -n testns
-k logs pythonpod -n testns
-k delete pod pythonpod -n testns --force
 
 
+Review logs and delete the pod.  
 
-
+```bash
+k get pods -n testns  
+k logs pythonpod -n testns  
+k delete pod pythonpod -n testns --force   
+```
 
 
 
